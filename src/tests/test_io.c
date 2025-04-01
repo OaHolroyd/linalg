@@ -90,16 +90,12 @@ int main(void) {
     REQUIRE_BARRIER(err == 0);
 
     // check that the values are as expected
-    double expected[n][m] = {
-        {1.0, 2.0},
-        {3.0, 4.0},
-        {5.0, 6.0},
-    };
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        REQUIRE(expected[i][j] == B[i][j]);
-      }
-    }
+    REQUIRE(B[0][0] == 1.0);
+    REQUIRE(B[0][1] == 2.0);
+    REQUIRE(B[1][0] == 3.0);
+    REQUIRE(B[1][1] == 4.0);
+    REQUIRE(B[2][0] == 5.0);
+    REQUIRE(B[2][1] == 6.0);
 
     unlink(filename);
   }
