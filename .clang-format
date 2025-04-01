@@ -1,0 +1,8 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+InsertNewlineAtEOF: true
+AllowShortFunctionsOnASingleLine: Empty
+AlignTrailingComments: false
+IndentCaseLabels: true
+AllowShortCaseLabelsOnASingleLine: true
