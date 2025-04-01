@@ -46,3 +46,22 @@ int mat_output(
 ) {
   return mat_outputf(filename, "%.8f", A, n, m);
 }
+
+int mat_input(const char *filename, double *A, const int n, const int m) {
+  FILE *fp = fopen(filename, "r");
+  if (fp == NULL) {
+    return 1;
+  }
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      int ret = fscanf(fp, "%lf", &A[i * m + j]);
+      if (ret != 1) {
+        fclose(fp);
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}

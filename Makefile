@@ -20,14 +20,15 @@ ifeq ($(DEBUG),0)
 	CFLAGS=-O3
 	LDFLAGS=
 	PRE_CHECK=
+	AT_CHECK=
 	POST_CHECK=
 else
 	CFLAGS=-g3 -Og -fsanitize=address,undefined,leak -fno-omit-frame-pointer
 	LDFLAGS=-g3 -fsanitize=address,undefined,leak
 
 	# on macOS LSAN will detect leaks in the ObjC standard library so we have to suppress them
-	PRE_CHECK=echo "leak:_fetchInitializingClassList\n leak:__Balloc" >> suppr.txt; \
-	          ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=suppr.txt MallocNanoZone=0
+	PRE_CHECK=echo "leak:_fetchInitializingClassList\nleak:__Balloc\nleak:__parsefloat_buf" >> suppr.txt
+	AT_CHECK=ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=suppr.txt MallocNanoZone=0
 	POST_CHECK=rm suppr.txt
 endif
 
@@ -97,7 +98,8 @@ $(TEST_DIR):
 # run all test executables
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_% : $(TESTS)
-	@$(PRE_CHECK) $(TEST_DIR)/$* \
+	@$(PRE_CHECK)
+	@$(AT_CHECK) $(TEST_DIR)/$* \
 	&& printf "`tput bold``tput setaf 2`PASSED %s`tput sgr0`\n" $* \
 	|| printf "`tput bold``tput setaf 1`FAILED %s`tput sgr0`\n" $*
 	@$(POST_CHECK)

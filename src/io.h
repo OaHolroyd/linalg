@@ -80,4 +80,20 @@ int mat_outputf(
  */
 int mat_output(const char *filename, const double *A, int n, int m);
 
+/**
+ * Read a matrix from a text file in a specified format.
+ *
+ * Entries are expected to be separated by whitespace. Note that this is a very
+ * lax parser and will accept any whitespace, including newlines, even when not
+ * at the end of a row. It will also accept files with too many entries, but
+ * will error if there are too few.
+ *
+ * @param filename name of the file to read from
+ * @param A pointer to the flattened matrix data to be filled.
+ * @param n number of rows
+ * @param m number of columns
+ * @return 0 on success, 1 on failure
+ */
+int mat_input(const char *filename, double *A, int n, int m);
+
 #endif // IO_H
