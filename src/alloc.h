@@ -28,6 +28,18 @@
 double **malloc_d2d(int n, int m);
 
 /**
+ * Allocates a 2D 'array' of doubles initialised to zero. Must be freed with
+ * free_2d.
+ *
+ * This is to malloc_d2d what calloc is to malloc. See malloc_d2d for details.
+ *
+ * @param n number of rows
+ * @param m number of columns
+ * @return pointer to a 2D array of size n x m
+ */
+double **calloc_d2d(int n, int m);
+
+/**
  * Frees a 2D array of any type allocated with malloc_X2d.
  *
  * This frees both the pointers and the contiguous block of memory.
