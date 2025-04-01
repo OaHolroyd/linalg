@@ -3,7 +3,7 @@ CC=/opt/homebrew/opt/llvm/bin/clang-20
 LD=$(CC)
 
 # libraries
-INCLUDES=
+INCLUDES=-I.
 LDLIBS=-lm
 
 # flags
