@@ -27,7 +27,7 @@ make DEBUG=1 rebuild # to ensure that non-debug code is recompiled
 make check
 ```
 
-Note that the Makefile is currently set up to use homebrew's `clang`, so you 
+Note that the Makefile is currently set up to use Homebrew's `clang`, so you 
 might need to change the compiler to work on your machine.
 
 ## Contents
