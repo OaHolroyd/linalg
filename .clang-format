@@ -6,3 +6,4 @@ AllowShortFunctionsOnASingleLine: Empty
 AlignTrailingComments: false
 IndentCaseLabels: true
 AllowShortCaseLabelsOnASingleLine: true
+AlignAfterOpenBracket: BlockIndent
