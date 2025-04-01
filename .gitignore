@@ -2,6 +2,9 @@
 .idea
 /tests/
 
+# Docs
+*.pdf
+
 # Prerequisites
 *.d
 

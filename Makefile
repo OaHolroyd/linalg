@@ -1,6 +1,10 @@
 # compiler/linker
-CC=gcc
+CC=/opt/homebrew/opt/llvm/bin/clang-20
 LD=$(CC)
+
+# libraries
+INCLUDES=
+LDLIBS=-lm
 
 # flags
 WARNINGS=-Wall -Wextra -pedantic -Wno-unused-parameter -Wshadow \
@@ -9,15 +13,24 @@ WARNINGS=-Wall -Wextra -pedantic -Wno-unused-parameter -Wshadow \
          -Wnested-externs -Wpointer-arith -Wconversion -Wno-sign-conversion \
          -Wredundant-decls -Wsequence-point -Wstrict-prototypes -Wswitch -Wundef \
          -Wunused-but-set-parameter -Wwrite-strings -Wvla -Wno-gnu-zero-variadic-macro-arguments
-CFLAGS=-O3
-LDFLAGS=-lm
 
-CFLAGS_DEBUG=-O0
-LDFLAGS_DEBUG=-lm
+# switch between debug and release mode
+DEBUG ?=0
+ifeq ($(DEBUG),0)
+	CFLAGS=-O3
+	LDFLAGS=
+	PRE_CHECK=
+	AT_CHECK=
+	POST_CHECK=
+else
+	CFLAGS=-g3 -Og -fsanitize=address,undefined,leak -fno-omit-frame-pointer
+	LDFLAGS=-g3 -fsanitize=address,undefined,leak
 
-# libraries
-INCLUDES=
-LDLIBS=
+	# on macOS LSAN will detect leaks in the ObjC standard library so we have to suppress them
+	PRE_CHECK=echo "leak:_fetchInitializingClassList\nleak:__Balloc\nleak:__parsefloat_buf" >> suppr.txt
+	AT_CHECK=ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=suppr.txt MallocNanoZone=0
+	POST_CHECK=rm suppr.txt
+endif
 
 # directories
 SRC_DIR=./src
@@ -51,17 +64,11 @@ clean:
 .PHONY: rebuild
 rebuild: | clean all
 
-# degub build
-.PHONY: debug
-debug: CFLAGS = ${CFLAGS_DEBUG}
-debug: CFLAGS = ${LDFLAGS_DEBUG}
-debug: all
-
 # run all tests
 .PHONY: check
 check: $(RUN_TESTS)
 
-# link the linalg objects and the correct test object to make a test
+# link the linalg objects and the correct test objects to make the tests
 $(TESTS): $(TEST_DIR)/% : $(OBJ_DIR)/%.o $(OBJ) | $(TEST_DIR)
 	@printf "`tput bold``tput setaf 2`Linking %s`tput sgr0`\n" $@
 	$(LD) $(LDFLAGS) -o $@ $(OBJ) $< $(LDLIBS)
@@ -91,6 +98,8 @@ $(TEST_DIR):
 # run all test executables
 .PHONY: $(RUN_TESTS)
 $(RUN_TESTS): run_% : $(TESTS)
-	@$(TEST_DIR)/$* \
+	@$(PRE_CHECK)
+	@$(AT_CHECK) $(TEST_DIR)/$* \
 	&& printf "`tput bold``tput setaf 2`PASSED %s`tput sgr0`\n" $* \
 	|| printf "`tput bold``tput setaf 1`FAILED %s`tput sgr0`\n" $*
+	@$(POST_CHECK)
