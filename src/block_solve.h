@@ -17,13 +17,16 @@
  * @param D lower right block
  * @param a upper right hand side
  * @param b lower right hand side
+ * @param pivn pivot array for A
+ * @param pivm pivot array for S
+ * @param work interim workspace, should be at least size max(n*(m+1), (n+1)*m)
  * @param n upper left block size
  * @param m lower right block size
  * @return 0 on success, -1 on error
  */
 int block_solve(
-    double *A, double *B, double *C, double *D, double *a, double *b, int n,
-    int m
+    double *A, double *B, const double *C, double *D, double *a, double *b,
+    int *pivn, int *pivm, double *work, int n, int m
 );
 
 #endif // BLOCK_SOLVE_H

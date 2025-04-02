@@ -220,7 +220,7 @@ int main(void) {
       }
     }
 
-    lu_factorise_no_pivoting(A[0], n);
+    lu_factorise(A[0], NULL, n);
 
     // multiply the L and U matrices to check that they are correct
     double **LU = malloc_d2d(n, n);
@@ -266,7 +266,7 @@ int main(void) {
       ff[i] = f[i]; // copy the original rhs
     }
 
-    lu_solve_no_pivoting(A[0], f, n);
+    lu_solve(A[0], f, NULL, n);
 
     // check that Ax = f
     for (int i = 0; i < n; i++) {
@@ -283,7 +283,7 @@ int main(void) {
       f[i] = (double)(rand() % 1000 - 500) / 100.0;
       ff[i] = f[i]; // copy the original rhs
     }
-    lu_solve_factorised_no_pivoting(A[0], f, n);
+    lu_solve_factorised(A[0], NULL, f, n);
 
     // check that Ax = f
     for (int i = 0; i < n; i++) {
@@ -314,7 +314,7 @@ int main(void) {
     }
 
     // no pivoting means this should fail immediately
-    int err = lu_factorise_no_pivoting(A[0], n);
+    int err = lu_factorise(A[0], NULL, n);
     REQUIRE(err == 1);
 
     // fill the matrix with random values including a zero column
@@ -325,7 +325,7 @@ int main(void) {
     }
 
     // as with pivoting, should also fail immediately
-    err = lu_factorise_no_pivoting(A[0], n);
+    err = lu_factorise(A[0], NULL, n);
     REQUIRE(err == 1);
 
     free_2d(A);
@@ -349,7 +349,7 @@ int main(void) {
     AA[0][0] = 0.0;
 
     // cannot pivot, so a zero on the diagonal is fatal
-    int err = lu_factorise_no_pivoting(A[0], n);
+    int err = lu_factorise(A[0], NULL, n);
     REQUIRE(err == 1);
 
     // we can get around this with pivoting

@@ -12,31 +12,33 @@ int ERR_COUNT;
 #define START_TEST(title) { TESTN = title; SUBTESTN = ""; ERR_COUNT = 0; }
 
 
-#define SUBTEST(subtitle) { SUBTESTN = subtitle; }
+#define SUBTEST(subtitle) {                      \
+    SUBTESTN = subtitle;                       \
+    fprintf(stderr, "  %s:%s\n", TESTN, SUBTESTN); \
+  }
 
 
-#define REQUIRE(cond) { int l = __LINE__;                                     \
-    if (!(cond)) {                                                            \
-      ERR_COUNT++;                                                            \
-      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TESTN, SUBTESTN, l);      \
-    }                                                                         \
+#define REQUIRE(cond) { int l = __LINE__;          \
+    if (!(cond)) {                                 \
+      ERR_COUNT++;                                 \
+      fprintf(stderr, "    line %d: FAILED\n", l); \
+    }                                              \
   }
 
 // as above but exits early if the condition is not met
-#define REQUIRE_BARRIER(cond) { int l = __LINE__;                             \
-    if (!(cond)) {                                                            \
-      ERR_COUNT++;                                                            \
-      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TESTN, SUBTESTN, l);      \
-      fprintf(stderr, "    ABORTED EARLY DUE TO FAILURE\n");                  \
-      return 1;                                                               \
-    }                                                                         \
+#define REQUIRE_BARRIER(cond) { int l = __LINE__;   \
+    if (!(cond)) {                                  \
+      ERR_COUNT++;                                  \
+      fprintf(stderr, "    line %d: ABORTED\n", l); \
+      return 1;                                     \
+    }                                               \
   }
 
-#define REQUIRE_CLOSE(x, y, tol) { int l = __LINE__;                          \
-    if (fabs(((double)(x)) - ((double)(y))) > tol) {                          \
-      ERR_COUNT++;                                                            \
-      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TESTN, SUBTESTN, l);      \
-    }                                                                         \
+#define REQUIRE_CLOSE(x, y, tol) { int l = __LINE__; \
+    if (fabs(((double)(x)) - ((double)(y))) > tol) { \
+      ERR_COUNT++;                                   \
+      fprintf(stderr, "    line %d: FAILED\n", l);   \
+    }                                                \
   }
 
 

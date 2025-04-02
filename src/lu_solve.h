@@ -60,15 +60,6 @@ void lu_solve_factorised_multi(
 );
 
 /**
- * Solves the system of equations LUx = f.
- *
- * @param LU flattened matrix, containing LU factorisation
- * @param f right-hand side vector, overwritten with solution
- * @param n size of the matrix
- */
-void lu_solve_factorised_no_pivoting(const double *LU, double *f, int n);
-
-/**
  * Solves the system of equations Ax = f using LU factorisation with partial
  * pivoting.
  *
@@ -94,16 +85,5 @@ int lu_solve(double *A, double *f, int *piv, int n);
  * @return 0 on success, -1 on error
  */
 int lu_solve_multi(double *A, double *F, int *piv, int n, int m);
-
-/**
- * Solves the system of equations Ax = f using LU factorisation with no
- * pivoting.
- *
- * @param A flattened matrix, overwritten with LU factorisation
- * @param f right-hand side vector, overwritten with solution
- * @param n size of the matrix
- * @return 0 on success, -1 on error
- */
-int lu_solve_no_pivoting(double *A, double *f, int n);
 
 #endif // LU_SOLVE_H

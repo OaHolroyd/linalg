@@ -4,6 +4,7 @@
 #include "src/block_solve.h"
 #include "src/lu_solve.h"
 
+#include <src/io.h>
 #include <stdlib.h>
 
 int main(void) {
@@ -16,7 +17,6 @@ int main(void) {
     const int nm = n + m;
     double **R = malloc_d2d(nm, nm);
     double *f = malloc(nm * sizeof(double));
-    int *piv = malloc(nm * sizeof(int));
     double **A = malloc_d2d(n, n);
     double **B = malloc_d2d(n, m);
     double **C = malloc_d2d(m, n);
@@ -46,7 +46,7 @@ int main(void) {
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < m; j++) {
         R[n + i][n + j] = (double)(rand() % 1000 - 500) / 100.0;
-        C[i][j] = R[n + i][n + j];
+        D[i][j] = R[n + i][n + j];
       }
     }
 
@@ -57,12 +57,24 @@ int main(void) {
     }
     for (int i = 0; i < m; i++) {
       f[n + i] = (double)(rand() % 1000 - 500) / 100.0;
-      a[i] = f[n + i];
+      b[i] = f[n + i];
     }
 
-    lu_solve(R[0], f, piv, nm);
+    int err = lu_solve(R[0], f, NULL, nm);
+    REQUIRE_BARRIER(err == 0);
 
-    block_solve(A[0], B[0], C[0], D[0], a, b, n, m);
+    size_t work_size = n * m + ((n > m) ? n : m);
+    double *work = malloc(work_size * sizeof(double));
+    err = block_solve(A[0], B[0], C[0], D[0], a, b, NULL, NULL, work, n, m);
+    REQUIRE_BARRIER(err == 0);
+
+    // check that the block solve and the normal solve match
+    for (int i = 0; i < n; i++) {
+      REQUIRE_CLOSE(f[i], a[i], 1e-10);
+    }
+    for (int i = 0; i < m; i++) {
+      REQUIRE_CLOSE(f[n + i], b[i], 1e-10);
+    }
 
     free_2d(R);
     free_2d(A);
@@ -72,7 +84,7 @@ int main(void) {
     free(f);
     free(a);
     free(b);
-    free(piv);
+    free(work);
   }
 
   END_TEST();

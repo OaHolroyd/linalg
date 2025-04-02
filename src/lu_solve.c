@@ -86,15 +86,10 @@ int lu_factorise_no_pivoting(double *A, const int n) {
 void lu_solve_factorised(
     const double *LU, const int *piv, double *f, const int n
 ) {
-  if (piv == NULL) {
-    lu_solve_factorised_no_pivoting(LU, f, n);
-    return;
-  }
-
   // solve Ly = Pf by forward substitution
   for (int i = 0; i < n; i++) {
     // pivot the right-hand side
-    if (i < piv[i]) {
+    if ((piv != NULL) && (i < piv[i])) {
       const double tmp = f[i];
       f[i] = f[piv[i]];
       f[piv[i]] = tmp;
@@ -120,7 +115,7 @@ void lu_solve_factorised_multi(
   // solve Ly = Pf by forward substitution
   for (int i = 0; i < n; i++) {
     // pivot the right-hand side
-    if (i < piv[i]) {
+    if ((piv != NULL) && (i < piv[i])) {
       for (int j = 0; j < m; j++) { // apply to entire row
         const double tmp = F[i * m + j];
         F[i * m + j] = F[piv[i] * m + j];
@@ -148,28 +143,7 @@ void lu_solve_factorised_multi(
   }
 }
 
-void lu_solve_factorised_no_pivoting(const double *LU, double *f, const int n) {
-  // solve Ly = f by forward substitution
-  for (int i = 0; i < n; i++) {
-    for (int k = 0; k < i; k++) {
-      f[i] -= LU[i * n + k] * f[k];
-    }
-  }
-
-  // solve Ux = y by back substitution
-  for (int i = n - 1; i >= 0; i--) {
-    for (int k = i + 1; k < n; k++) {
-      f[i] -= LU[i * n + k] * f[k];
-    }
-    f[i] /= LU[i * n + i];
-  }
-}
-
 int lu_solve(double *A, double *f, int *piv, int n) {
-  if (piv == NULL) {
-    return lu_solve_no_pivoting(A, f, n);
-  }
-
   // factorise the matrix
   int err = lu_factorise(A, piv, n);
   if (err != 0) {
@@ -190,17 +164,5 @@ int lu_solve_multi(double *A, double *F, int *piv, int n, int m) {
 
   // solve the factorised system of equations
   lu_solve_factorised_multi(A, piv, F, n, m);
-  return 0;
-}
-
-int lu_solve_no_pivoting(double *A, double *f, int n) {
-  // factorise the matrix
-  int err = lu_factorise_no_pivoting(A, n);
-  if (err != 0) {
-    return err; // return the row of the first zero pivot
-  }
-
-  // solve the factorised system of equations
-  lu_solve_factorised_no_pivoting(A, f, n);
   return 0;
 }
