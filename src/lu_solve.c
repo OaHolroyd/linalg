@@ -1,10 +1,15 @@
-#include "lu-solve.h"
+#include "lu_solve.h"
 
 #include <math.h>
+#include <stddef.h>
 
 #define LU_TOL (1e-10)
 
 int lu_factorise(double *A, int *piv, const int n) {
+  if (piv == NULL) {
+    return lu_factorise_no_pivoting(A, n);
+  }
+
   // start with a unit pivot matrix
   for (int i = 0; i < n; i++) {
     piv[i] = i;
@@ -56,9 +61,35 @@ int lu_factorise(double *A, int *piv, const int n) {
   return 0;
 }
 
+int lu_factorise_no_pivoting(double *A, const int n) {
+  for (int i = 0; i < n; i++) {
+    // if the diagonal entry is too small, the matrix is singular or requires
+    // pivoting to factorise
+    if (fabs(A[i * n + i]) < LU_TOL) {
+      return i + 1; // return the row of the first zero pivot
+    }
+
+    for (int j = i + 1; j < n; j++) {
+      // divide the row by the diagonal entry
+      A[j * n + i] /= A[i * n + i];
+
+      // subtract the row from the current row (Gaussian elimination)
+      for (int k = i + 1; k < n; k++) {
+        A[j * n + k] -= A[j * n + i] * A[i * n + k];
+      }
+    }
+  }
+
+  return 0;
+}
+
 int lu_solve_factorised(
     const double *LU, const int *piv, double *f, const int n
 ) {
+  if (piv == NULL) {
+    return lu_solve_factorised_no_pivoting(LU, f, n);
+  }
+
   // solve Ly = Pf by forward substitution
   for (int i = 0; i < n; i++) {
     // pivot the right-hand side
@@ -84,7 +115,30 @@ int lu_solve_factorised(
   return 0;
 }
 
+int lu_solve_factorised_no_pivoting(const double *LU, double *f, const int n) {
+  // solve Ly = f by forward substitution
+  for (int i = 0; i < n; i++) {
+    for (int k = 0; k < i; k++) {
+      f[i] -= LU[i * n + k] * f[k];
+    }
+  }
+
+  // solve Ux = y by back substitution
+  for (int i = n - 1; i >= 0; i--) {
+    for (int k = i + 1; k < n; k++) {
+      f[i] -= LU[i * n + k] * f[k];
+    }
+    f[i] /= LU[i * n + i];
+  }
+
+  return 0;
+}
+
 int lu_solve(double *A, double *f, int *piv, int n) {
+  if (piv == NULL) {
+    return lu_solve_no_pivoting(A, f, n);
+  }
+
   // factorise the matrix
   int err = lu_factorise(A, piv, n);
   if (err != 0) {
@@ -93,4 +147,15 @@ int lu_solve(double *A, double *f, int *piv, int n) {
 
   // solve the factorised system of equations
   return lu_solve_factorised(A, piv, f, n);
+}
+
+int lu_solve_no_pivoting(double *A, double *f, int n) {
+  // factorise the matrix
+  int err = lu_factorise_no_pivoting(A, n);
+  if (err != 0) {
+    return err; // return the row of the first zero pivot
+  }
+
+  // solve the factorised system of equations
+  return lu_solve_factorised_no_pivoting(A, f, n);
 }
