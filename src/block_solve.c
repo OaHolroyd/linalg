@@ -9,7 +9,7 @@ int block_solve(
     int *pivn, int *pivm, double *work, int n, int m
 ) {
   // solve a = A \ a
-  int err = lu_solve(A, a, NULL, n);
+  int err = lu_solve(A, a, pivn, n);
   if (err != 0) {
     return err;
   }
@@ -19,7 +19,7 @@ int block_solve(
   memcpy(AB, B, m * n * sizeof(double));
 
   // compute S = D - C A \ B
-  lu_solve_factorised_multi(A, NULL, AB, n, m);
+  lu_solve_factorised_multi(A, pivn, AB, n, m);
   for (int i = 0; i < m; i++) {
     for (int j = 0; j < m; j++) {
       for (int k = 0; k < n; k++) {
@@ -38,12 +38,12 @@ int block_solve(
   }
 
   // solve z = S \ z, b = S \ b
-  err = lu_factorise(D, NULL, m);
+  err = lu_factorise(D, pivm, m);
   if (err != 0) {
     return err;
   }
-  lu_solve_factorised(D, NULL, z, m);
-  lu_solve_factorised(D, NULL, b, m);
+  lu_solve_factorised(D, pivm, z, m);
+  lu_solve_factorised(D, pivm, b, m);
 
   // compute b = b - z
   for (int i = 0; i < m; i++) {
@@ -60,7 +60,7 @@ int block_solve(
   }
 
   // z = A \ z
-  lu_solve_factorised(A, NULL, z, n);
+  lu_solve_factorised(A, pivn, z, n);
 
   // a = a - z
   for (int i = 0; i < n; i++) {
