@@ -5,6 +5,52 @@
 
 #define LU_TOL (1e-10)
 
+/**
+ * Permute the right-hand side vectors according to the permutation array.
+ *
+ * @param F right-hand side vectors, overwritten with permuted vectors
+ * @param piv permutation array of length n, left unchanged
+ * @param n number of rows in F
+ * @param m number of right-hand side vectors
+ */
+static void permute_vectors(double *F, int *piv, const int n, const int m) {
+  for (int k = 0; k < n; k++) {
+    // find the first element that is not in the right place
+    int i = k;
+    for (; i < n; i++) {
+      if (piv[i] >= 0) {
+        break;
+      }
+    }
+    if (i == n) {
+      break; // all elements are in the right place
+    }
+
+    // go through the cycle starting with i until we get back to the start
+    const int ii = i; // remember the start of the cycle
+    int pi = piv[i];
+    piv[i] = -piv[i] - 1; // mark as used
+    while (pi != ii) {
+      // swap the rows of the right-hand side
+      for (int j = 0; j < m; j++) {
+        const double tmp = F[i * m + j];
+        F[i * m + j] = F[pi * m + j];
+        F[pi * m + j] = tmp;
+      }
+
+      // move forwards in the cycle
+      i = pi;
+      pi = piv[pi];
+      piv[i] = -piv[i] - 1; // mark as used
+    }
+  }
+
+  // put piv back to the original form so it can be reused
+  for (int i = 0; i < n; i++) {
+    piv[i] = -piv[i] - 1;
+  }
+}
+
 int lu_factorise(double *A, int *piv, const int n) {
   if (piv == NULL) {
     return lu_factorise_no_pivoting(A, n);
@@ -83,18 +129,14 @@ int lu_factorise_no_pivoting(double *A, const int n) {
   return 0;
 }
 
-void lu_solve_factorised(
-    const double *LU, const int *piv, double *f, const int n
-) {
+void lu_solve_factorised(const double *LU, int *piv, double *f, const int n) {
+  // pivot the right-hand side to compute Pf
+  if (piv != NULL) {
+    permute_vectors(f, piv, n, 1);
+  }
+
   // solve Ly = Pf by forward substitution
   for (int i = 0; i < n; i++) {
-    // pivot the right-hand side
-    if ((piv != NULL) && (i < piv[i])) {
-      const double tmp = f[i];
-      f[i] = f[piv[i]];
-      f[piv[i]] = tmp;
-    }
-
     for (int k = 0; k < i; k++) {
       f[i] -= LU[i * n + k] * f[k];
     }
@@ -110,19 +152,15 @@ void lu_solve_factorised(
 }
 
 void lu_solve_factorised_multi(
-    const double *LU, const int *piv, double *F, int n, int m
+    const double *LU, int *piv, double *F, int n, int m
 ) {
-  // solve Ly = Pf by forward substitution
-  for (int i = 0; i < n; i++) {
-    // pivot the right-hand side
-    if ((piv != NULL) && (i < piv[i])) {
-      for (int j = 0; j < m; j++) { // apply to entire row
-        const double tmp = F[i * m + j];
-        F[i * m + j] = F[piv[i] * m + j];
-        F[piv[i] * m + j] = tmp;
-      }
-    }
+  // pivot the right-hand side to compute PF
+  if (piv != NULL) {
+    permute_vectors(F, piv, n, m);
+  }
 
+  // solve LY = PF by forward substitution
+  for (int i = 0; i < n; i++) {
     for (int k = 0; k < i; k++) {
       for (int j = 0; j < m; j++) { // apply to entire row
         F[i * m + j] -= LU[i * n + k] * F[k * m + j];
@@ -130,7 +168,7 @@ void lu_solve_factorised_multi(
     }
   }
 
-  // solve Ux = y by back substitution
+  // solve UX = Y by back substitution
   for (int i = n - 1; i >= 0; i--) {
     for (int k = i + 1; k < n; k++) {
       for (int j = 0; j < m; j++) { // apply to entire row

@@ -41,7 +41,7 @@ int lu_factorise_no_pivoting(double *A, int n);
  * @param f right-hand side vector, overwritten with solution
  * @param n size of the matrix
  */
-void lu_solve_factorised(const double *LU, const int *piv, double *f, int n);
+void lu_solve_factorised(const double *LU, int *piv, double *f, int n);
 
 /**
  * Solves the system of equations LUX = PF.
@@ -56,7 +56,7 @@ void lu_solve_factorised(const double *LU, const int *piv, double *f, int n);
  * @param m number of right-hand side vectors
  */
 void lu_solve_factorised_multi(
-    const double *LU, const int *piv, double *F, int n, int m
+    const double *LU, int *piv, double *F, int n, int m
 );
 
 /**

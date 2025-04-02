@@ -55,7 +55,7 @@ int main(void) {
 
   /* check LU factorisation solve */
   SUBTEST("LU solve") {
-    const int n = 5;
+    const int n = 7;
     double **A = malloc_d2d(n, n);
     double **AA = malloc_d2d(n, n);
     double *f = malloc(n * sizeof(double));
