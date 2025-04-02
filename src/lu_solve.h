@@ -40,9 +40,24 @@ int lu_factorise_no_pivoting(double *A, int n);
  * pivoting.
  * @param f right-hand side vector, overwritten with solution
  * @param n size of the matrix
- * @return 0 on success, -1 on error
  */
-int lu_solve_factorised(const double *LU, const int *piv, double *f, int n);
+void lu_solve_factorised(const double *LU, const int *piv, double *f, int n);
+
+/**
+ * Solves the system of equations LUX = PF.
+ *
+ * As for `lu_solve_factorised` but for multiple right-hand side vectors.
+ *
+ * @param LU flattened matrix, containing LU factorisation
+ * @param piv pivot array, containing pivot indices. If NULL, assumes no
+ * pivoting.
+ * @param F right-hand side vectors, overwritten with solution
+ * @param n number of rows of the matrix
+ * @param m number of right-hand side vectors
+ */
+void lu_solve_factorised_multi(
+    const double *LU, const int *piv, double *F, int n, int m
+);
 
 /**
  * Solves the system of equations LUx = f.
@@ -50,9 +65,8 @@ int lu_solve_factorised(const double *LU, const int *piv, double *f, int n);
  * @param LU flattened matrix, containing LU factorisation
  * @param f right-hand side vector, overwritten with solution
  * @param n size of the matrix
- * @return 0 on success, -1 on error
  */
-int lu_solve_factorised_no_pivoting(const double *LU, double *f, int n);
+void lu_solve_factorised_no_pivoting(const double *LU, double *f, int n);
 
 /**
  * Solves the system of equations Ax = f using LU factorisation with partial
@@ -66,6 +80,20 @@ int lu_solve_factorised_no_pivoting(const double *LU, double *f, int n);
  * @return 0 on success, -1 on error
  */
 int lu_solve(double *A, double *f, int *piv, int n);
+
+/**
+ * Solves the system of equations AX = F using LU factorisation with partial
+ * pivoting.
+ *
+ * @param A flattened matrix, overwritten with LU factorisation
+ * @param F right-hand side vectors, overwritten with solution
+ * @param piv pivot array, overwritten with pivot indices. If NULL, assumes no
+ * pivoting.
+ * @param n size of the matrix
+ * @param m number of right-hand side vectors
+ * @return 0 on success, -1 on error
+ */
+int lu_solve_multi(double *A, double *F, int *piv, int n, int m);
 
 /**
  * Solves the system of equations Ax = f using LU factorisation with no

@@ -3,6 +3,7 @@
 #include "src/alloc.h"
 #include "src/lu_solve.h"
 
+#include <src/io.h>
 #include <stdlib.h>
 
 int main(void) {
@@ -104,6 +105,71 @@ int main(void) {
     free_2d(AA);
     free(f);
     free(ff);
+    free(piv);
+  }
+
+  /* check LU factorisation solve with multiple RHSs */
+  SUBTEST("LU solve multi") {
+    const int n = 5;
+    const int m = 3;
+    double **A = malloc_d2d(n, n);
+    double **AA = malloc_d2d(n, n);
+    double **F = malloc_d2d(n, m);
+    double **FF = malloc_d2d(n, m);
+    int *piv = malloc(n * sizeof(int));
+
+    // fill the matrix and rhs with random values
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        A[i][j] = (double)(rand() % 1000 - 500) / 100.0;
+        AA[i][j] = A[i][j]; // copy the original matrix
+      }
+
+      for (int j = 0; j < m; j++) {
+        F[i][j] = (double)(rand() % 1000 - 500) / 100.0;
+        FF[i][j] = F[i][j]; // copy the original rhs
+      }
+    }
+
+    lu_solve_multi(A[0], F[0], piv, n, m);
+
+    // check that AX = F
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        // compute the ijth entry of AX
+        double AXij = 0.0;
+        for (int k = 0; k < n; k++) {
+          AXij += AA[i][k] * F[k][j];
+        }
+        REQUIRE_CLOSE(AXij, FF[i][j], 1e-10);
+      }
+    }
+
+    // perform another solve reusing the LU factorisation
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        F[i][j] = (double)(rand() % 1000 - 500) / 100.0;
+        FF[i][j] = F[i][j]; // copy the original rhs
+      }
+    }
+    lu_solve_factorised_multi(A[0], piv, F[0], n, m);
+
+    // check that AX = F
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        // compute the ijth entry of AX
+        double AXij = 0.0;
+        for (int k = 0; k < n; k++) {
+          AXij += AA[i][k] * F[k][j];
+        }
+        REQUIRE_CLOSE(AXij, FF[i][j], 1e-10);
+      }
+    }
+
+    free_2d(A);
+    free_2d(AA);
+    free_2d(F);
+    free_2d(FF);
     free(piv);
   }
 

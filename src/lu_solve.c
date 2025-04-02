@@ -83,11 +83,12 @@ int lu_factorise_no_pivoting(double *A, const int n) {
   return 0;
 }
 
-int lu_solve_factorised(
+void lu_solve_factorised(
     const double *LU, const int *piv, double *f, const int n
 ) {
   if (piv == NULL) {
-    return lu_solve_factorised_no_pivoting(LU, f, n);
+    lu_solve_factorised_no_pivoting(LU, f, n);
+    return;
   }
 
   // solve Ly = Pf by forward substitution
@@ -111,11 +112,43 @@ int lu_solve_factorised(
     }
     f[i] /= LU[i * n + i];
   }
-
-  return 0;
 }
 
-int lu_solve_factorised_no_pivoting(const double *LU, double *f, const int n) {
+void lu_solve_factorised_multi(
+    const double *LU, const int *piv, double *F, int n, int m
+) {
+  // solve Ly = Pf by forward substitution
+  for (int i = 0; i < n; i++) {
+    // pivot the right-hand side
+    if (i < piv[i]) {
+      for (int j = 0; j < m; j++) { // apply to entire row
+        const double tmp = F[i * m + j];
+        F[i * m + j] = F[piv[i] * m + j];
+        F[piv[i] * m + j] = tmp;
+      }
+    }
+
+    for (int k = 0; k < i; k++) {
+      for (int j = 0; j < m; j++) { // apply to entire row
+        F[i * m + j] -= LU[i * n + k] * F[k * m + j];
+      }
+    }
+  }
+
+  // solve Ux = y by back substitution
+  for (int i = n - 1; i >= 0; i--) {
+    for (int k = i + 1; k < n; k++) {
+      for (int j = 0; j < m; j++) { // apply to entire row
+        F[i * m + j] -= LU[i * n + k] * F[k * m + j];
+      }
+    }
+    for (int j = 0; j < m; j++) { // apply to entire row
+      F[i * m + j] /= LU[i * n + i];
+    }
+  }
+}
+
+void lu_solve_factorised_no_pivoting(const double *LU, double *f, const int n) {
   // solve Ly = f by forward substitution
   for (int i = 0; i < n; i++) {
     for (int k = 0; k < i; k++) {
@@ -130,8 +163,6 @@ int lu_solve_factorised_no_pivoting(const double *LU, double *f, const int n) {
     }
     f[i] /= LU[i * n + i];
   }
-
-  return 0;
 }
 
 int lu_solve(double *A, double *f, int *piv, int n) {
@@ -146,7 +177,20 @@ int lu_solve(double *A, double *f, int *piv, int n) {
   }
 
   // solve the factorised system of equations
-  return lu_solve_factorised(A, piv, f, n);
+  lu_solve_factorised(A, piv, f, n);
+  return 0;
+}
+
+int lu_solve_multi(double *A, double *F, int *piv, int n, int m) {
+  // factorise the matrix
+  int err = lu_factorise(A, piv, n);
+  if (err != 0) {
+    return err; // return the row of the first zero pivot
+  }
+
+  // solve the factorised system of equations
+  lu_solve_factorised_multi(A, piv, F, n, m);
+  return 0;
 }
 
 int lu_solve_no_pivoting(double *A, double *f, int n) {
@@ -157,5 +201,6 @@ int lu_solve_no_pivoting(double *A, double *f, int n) {
   }
 
   // solve the factorised system of equations
-  return lu_solve_factorised_no_pivoting(A, f, n);
+  lu_solve_factorised_no_pivoting(A, f, n);
+  return 0;
 }
