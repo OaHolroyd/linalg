@@ -2,38 +2,42 @@
 #define TESTING_H
 
 #include <stdio.h>
+#include <math.h>
 
 
-const char *TEST_NAME;
-const char *SUBTEST_NAME;
+const char *TESTN;
+const char *SUBTESTN;
 int ERR_COUNT;
 
-#define START_TEST(title) { TEST_NAME = title; SUBTEST_NAME = ""; ERR_COUNT = 0; }
+#define START_TEST(title) { TESTN = title; SUBTESTN = ""; ERR_COUNT = 0; }
 
 
-#define SUBTEST(subtitle) { SUBTEST_NAME = subtitle; }
+#define SUBTEST(subtitle) { SUBTESTN = subtitle; }
 
 
-#define REQUIRE(cond) { int l = __LINE__;                                             \
-    if (!(cond)) {                                                                    \
-      ERR_COUNT++;                                                                    \
-      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TEST_NAME, SUBTEST_NAME, l);      \
-    } else {                                                                          \
-      /* fprintf(stderr, "%s (line %d) PASSED\n", TEST_NAME, l); */                   \
-    }                                                                                 \
+#define REQUIRE(cond) { int l = __LINE__;                                     \
+    if (!(cond)) {                                                            \
+      ERR_COUNT++;                                                            \
+      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TESTN, SUBTESTN, l);      \
+    }                                                                         \
   }
 
 // as above but exits early if the condition is not met
-#define REQUIRE_BARRIER(cond) { int l = __LINE__;                                     \
-    if (!(cond)) {                                                                    \
-      ERR_COUNT++;                                                                    \
-      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TEST_NAME, SUBTEST_NAME, l);      \
-      fprintf(stderr, "    ABORTED EARLY DUE TO FAILURE\n");                          \
-      return 1;                                                                       \
-    } else {                                                                          \
-      /* fprintf(stderr, "%s (line %d) PASSED\n", TEST_NAME, l); */                   \
-    }                                                                                 \
-}
+#define REQUIRE_BARRIER(cond) { int l = __LINE__;                             \
+    if (!(cond)) {                                                            \
+      ERR_COUNT++;                                                            \
+      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TESTN, SUBTESTN, l);      \
+      fprintf(stderr, "    ABORTED EARLY DUE TO FAILURE\n");                  \
+      return 1;                                                               \
+    }                                                                         \
+  }
+
+#define REQUIRE_CLOSE(x, y, tol) { int l = __LINE__;                          \
+    if (fabs(((double)(x)) - ((double)(y))) > tol) {                          \
+      ERR_COUNT++;                                                            \
+      fprintf(stderr, "  %s:%s (line %d) FAILED\n", TESTN, SUBTESTN, l);      \
+    }                                                                         \
+  }
 
 
 #define END_TEST() { return ERR_COUNT; }
