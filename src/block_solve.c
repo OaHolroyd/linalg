@@ -1,3 +1,8 @@
+/**
+ * This block solve is described in "Inverses of 2x2 Block Matrices" by Lu and
+ * Shiou 2000 (https://doi.org/10.1016/S0898-1221(01)00278-4), eqn 2.2.
+ */
+
 #include "block_solve.h"
 
 #include <string.h>
