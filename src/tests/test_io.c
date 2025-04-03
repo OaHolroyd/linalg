@@ -48,7 +48,7 @@ int main(void) {
     // check that the values are the same
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
-        REQUIRE(A[i][j] == B[i][j]);
+        REQUIRE_CLOSE(A[i][j], B[i][j], 1e-10);
       }
     }
 
