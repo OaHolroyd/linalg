@@ -31,8 +31,8 @@
  * @return 0 on success, -1 on error
  */
 int block_solve(
-    double *A, double *B, const double *C, double *D, double *a, double *b,
-    int *pivn, int *pivm, double *work, int n, int m
+    double *A, const double *B, const double *C, double *D, double *a,
+    double *b, int *pivn, int *pivm, double *work, int n, int m
 );
 
 /**

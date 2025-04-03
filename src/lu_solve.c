@@ -1,3 +1,9 @@
+/**
+ * All the LU factorisation, pivoting, and solving algorithms are based on the
+ * examples on Wikipedia:
+ *   https://en.wikipedia.org/wiki/LU_decomposition
+ */
+
 #include "lu_solve.h"
 
 #include <math.h>
@@ -152,7 +158,7 @@ void lu_solve_factorised(const double *LU, int *piv, double *f, const int n) {
 }
 
 void lu_solve_factorised_multi(
-    const double *LU, int *piv, double *F, int n, int m
+    const double *LU, int *piv, double *F, const int n, const int m
 ) {
   // pivot the right-hand side to compute PF
   if (piv != NULL) {
@@ -181,9 +187,9 @@ void lu_solve_factorised_multi(
   }
 }
 
-int lu_solve(double *A, double *f, int *piv, int n) {
+int lu_solve(double *A, double *f, int *piv, const int n) {
   // factorise the matrix
-  int err = lu_factorise(A, piv, n);
+  const int err = lu_factorise(A, piv, n);
   if (err != 0) {
     return err; // return the row of the first zero pivot
   }
@@ -193,9 +199,9 @@ int lu_solve(double *A, double *f, int *piv, int n) {
   return 0;
 }
 
-int lu_solve_multi(double *A, double *F, int *piv, int n, int m) {
+int lu_solve_multi(double *A, double *F, int *piv, const int n, const int m) {
   // factorise the matrix
-  int err = lu_factorise(A, piv, n);
+  const int err = lu_factorise(A, piv, n);
   if (err != 0) {
     return err; // return the row of the first zero pivot
   }
