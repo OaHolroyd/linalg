@@ -1,11 +1,10 @@
 #include "testing.h"
 
+#include <stdlib.h>
+
 #include "src/alloc.h"
 #include "src/block_solve.h"
 #include "src/lu_solve.h"
-
-#include <src/io.h>
-#include <stdlib.h>
 
 int main(void) {
   START_TEST("block solve");
