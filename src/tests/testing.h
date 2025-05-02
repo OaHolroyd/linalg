@@ -23,30 +23,27 @@ int ERR_COUNT;
 
 #define REQUIRE(cond)                                                          \
   {                                                                            \
-    int l = __LINE__;                                                          \
     if (!(cond)) {                                                             \
       ERR_COUNT++;                                                             \
-      fprintf(stderr, "    line %d: FAILED\n", l);                             \
+      fprintf(stderr, "    line %d: FAILED\n", __LINE__);                      \
     }                                                                          \
   }
 
 // as above but exits early if the condition is not met
 #define REQUIRE_BARRIER(cond)                                                  \
   {                                                                            \
-    int l = __LINE__;                                                          \
     if (!(cond)) {                                                             \
       ERR_COUNT++;                                                             \
-      fprintf(stderr, "    line %d: ABORTED\n", l);                            \
+      fprintf(stderr, "    line %d: ABORTED\n", __LINE__);                     \
       return 1;                                                                \
     }                                                                          \
   }
 
 #define REQUIRE_CLOSE(x, y, tol)                                               \
   {                                                                            \
-    int l = __LINE__;                                                          \
     if (fabs(((double)(x)) - ((double)(y))) > tol) {                           \
       ERR_COUNT++;                                                             \
-      fprintf(stderr, "    line %d: FAILED\n", l);                             \
+      fprintf(stderr, "    line %d: FAILED\n", __LINE__);                      \
     }                                                                          \
   }
 
