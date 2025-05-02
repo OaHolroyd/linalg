@@ -52,3 +52,4 @@ The various functions are grouped into the following categories:
 
 * [General LU solvers](/src/lu_solve.h)
 * [Block-decomposed solvers](/src/block_solve.h)
+* [Pentadiagonal solvers](/src/pent_solve.h)
